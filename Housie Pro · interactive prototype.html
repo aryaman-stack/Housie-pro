@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Housie Pro · interactive prototype</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Manrope:wght@500;600;700;800&display=swap">
+<style>
+:root{
+  --page-bg:#E3E5DE; --page-grid:rgba(26,29,36,.07); --page-ink:#1A1D24; --page-muted:#50586A; --page-card:#FFFFFF;
+  --ink:#1A1D24; --muted:#5B6478; --lime:#CDDB00; --lime-soft:#F2F6C4; --app:#F5F4EF; --card:#FFFFFF; --line:#E3E1D8; --chip:#F0F0E6; --ok:#2F7D4F;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --page-bg:#15171C; --page-grid:rgba(255,255,255,.05); --page-ink:#ECEDE7; --page-muted:#A7ADB9; --page-card:#1F2229; }
+}
+:root[data-theme="dark"]{ --page-bg:#15171C; --page-grid:rgba(255,255,255,.05); --page-ink:#ECEDE7; --page-muted:#A7ADB9; --page-card:#1F2229; }
+html{scroll-padding-top:env(safe-area-inset-top,0px); height:100%}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0; min-height:100%; font-family:Manrope,'Segoe UI',system-ui,sans-serif; color:var(--page-ink); background:var(--page-bg);
+  background-image:linear-gradient(var(--page-grid) 1px,transparent 1px),linear-gradient(90deg,var(--page-grid) 1px,transparent 1px); background-size:28px 28px}
+button{font-family:inherit; cursor:pointer}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:3px solid #7C8A00; outline-offset:2px}
+.wrap{min-height:100vh; display:flex; gap:56px; align-items:center; justify-content:center; padding:32px 24px}
+.guide{max-width:360px}
+.guide h1{font-family:'Bricolage Grotesque',Manrope,sans-serif; font-size:40px; line-height:1.05; letter-spacing:-.5px; margin:0 0 12px}
+.guide p{color:var(--page-muted); font-size:15px; line-height:1.55; margin:0 0 20px}
+.steps{list-style:none; padding:0; margin:0 0 22px; display:flex; flex-direction:column; gap:10px; counter-reset:s}
+.steps li{counter-increment:s; display:flex; gap:12px; align-items:flex-start; background:var(--page-card); border-radius:12px; padding:11px 14px; font-size:14px; font-weight:600; line-height:1.4}
+.steps li::before{content:counter(s); flex-shrink:0; width:24px; height:24px; border-radius:50%; background:var(--lime); color:#1A1D24; font-weight:800; font-size:12px; display:flex; align-items:center; justify-content:center}
+.steps li.done{opacity:.55}
+.steps li.done::before{content:"✓"}
+.reset{border:1.5px solid var(--page-ink); background:transparent; color:var(--page-ink); border-radius:10px; padding:9px 14px; font-weight:800; font-size:13px}
+.note{font-size:12px!important; margin-top:14px!important}
+.phone{position:relative; width:390px; height:min(844px, calc(100vh - 64px)); min-height:640px; background:#1C1D22; border-radius:52px; padding:12px; box-shadow:0 30px 60px rgba(26,29,36,.25); flex-shrink:0}
+.cam{position:absolute; top:24px; left:50%; transform:translateX(-50%); width:12px; height:12px; border-radius:50%; background:#050608; z-index:5}
+.screen{position:relative; width:100%; height:100%; border-radius:42px; overflow:hidden; background:var(--app); color:var(--ink); display:flex; flex-direction:column}
+.scroll{flex:1; min-height:0; overflow-y:auto; padding:44px 14px 16px; scrollbar-width:none}
+.scroll::-webkit-scrollbar{display:none}
+.nav{flex-shrink:0; display:grid; grid-template-columns:repeat(4,1fr); background:#fff; border-top:1px solid var(--line); padding:6px 8px 16px}
+.nav button{border:none; background:none; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:11px; font-weight:700; color:var(--muted); padding:6px 0}
+.nav button[aria-current="page"]{color:var(--ink); font-weight:800}
+.nav button[aria-current="page"] svg{background:var(--lime); border-radius:8px}
+.nav svg{width:34px; height:26px; padding:3px 7px}
+.top{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px}
+.brand{display:flex; align-items:center; gap:8px}
+.word{font-family:'Bricolage Grotesque',Manrope,sans-serif; font-weight:800; font-size:25px; letter-spacing:-.5px}
+.pro{background:var(--lime); font-size:11px; font-weight:800; padding:3px 8px; border-radius:999px}
+.icons{display:flex; gap:8px}
+.ib{position:relative; width:40px; height:40px; border-radius:12px; border:1px solid #DDDAD0; background:#fff; display:flex; align-items:center; justify-content:center; color:var(--ink)}
+.badge{position:absolute; top:-6px; right:-6px; min-width:19px; height:19px; padding:0 4px; border-radius:999px; background:var(--ink); color:#fff; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; border:2px solid var(--app)}
+.back{display:flex; align-items:center; gap:10px; margin-bottom:12px}
+.back h2{font-family:'Bricolage Grotesque',Manrope,sans-serif; font-size:21px; margin:0}
+.deliv{display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:12.5px; color:var(--muted); font-weight:600; margin-bottom:10px}
+.deliv b{color:var(--ink)}
+.tag{background:var(--lime-soft); color:#4A5200; font-size:11px; font-weight:800; padding:2px 8px; border-radius:999px}
+.search{display:flex; align-items:center; gap:8px; height:42px; padding:0 12px; background:#fff; border:1px solid #DDDAD0; border-radius:12px; color:var(--muted); margin-bottom:10px}
+.search input{border:none; outline:none; background:none; font:inherit; font-size:13.5px; color:var(--ink); flex:1; min-width:0}
+.hello{background:var(--lime); border-radius:16px; padding:12px 14px; margin-bottom:12px}
+.hello .row{display:flex; justify-content:space-between; align-items:center}
+.hello .name{font-family:'Bricolage Grotesque',Manrope,sans-serif; font-size:17px; font-weight:700}
+.chipd{background:var(--ink); color:var(--lime); font-size:11px; font-weight:800; padding:4px 9px; border-radius:999px}
+.bar{height:6px; border-radius:999px; background:rgba(26,29,36,.18); margin:9px 0 5px; overflow:hidden}
+.bar i{display:block; height:100%; background:var(--ink); border-radius:999px; transition:width .5s}
+.small{font-size:11.5px; font-weight:700}
+.sec{display:flex; justify-content:space-between; align-items:center; margin:4px 2px 8px}
+.sec h3{font-size:15px; margin:0}
+.link{border:none; background:none; font-weight:800; font-size:12.5px; color:var(--ink); text-decoration:underline; text-underline-offset:3px; padding:4px}
+.cats{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:12px}
+.cat{border:none; background:none; padding:0; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:11px; font-weight:700; color:var(--ink); text-align:center; line-height:1.2}
+.cat span.t{width:100%; height:62px; border-radius:14px; background:#fff; border:1px solid var(--line); display:flex; align-items:center; justify-content:center}
+.cat svg{width:42px; height:42px}
+.card{position:relative; background:var(--card); border:1px solid var(--line); border-radius:16px; padding:12px 14px; margin-bottom:10px}
+.over{font-size:10.5px; font-weight:800; letter-spacing:.4px; color:var(--muted)}
+.ct{font-size:14.5px; font-weight:800; line-height:1.3; margin:3px 0 8px}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{font-size:11.5px; font-weight:700; padding:5px 8px; border-radius:8px; background:var(--chip)}
+.rowb{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px}
+.btn{height:38px; padding:0 14px; border-radius:11px; border:none; background:var(--ink); color:#fff; font-size:12.5px; font-weight:800; white-space:nowrap}
+.btn.l{background:var(--lime); color:var(--ink)}
+.btn.o{background:#fff; color:var(--ink); border:1.5px solid var(--ink)}
+.btn.w{width:100%; height:46px; font-size:14px}
+.btn:disabled{opacity:.45; cursor:not-allowed}
+.muted{color:var(--muted); font-size:12px; font-weight:600}
+.item{display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:none}
+.thumb{width:44px; height:44px; flex-shrink:0; border-radius:12px; background:var(--chip); display:flex; align-items:center; justify-content:center}
+.thumb svg{width:32px; height:32px}
+.grow{flex:1; min-width:0}
+.pn{font-size:13.5px; font-weight:800; line-height:1.3}
+.step{display:flex; align-items:center; border:1.5px solid var(--ink); border-radius:10px; overflow:hidden}
+.step button{width:30px; height:30px; border:none; background:#fff; font-weight:800; font-size:16px}
+.step span{min-width:28px; text-align:center; font-weight:800; font-size:13px}
+.sum{display:flex; justify-content:space-between; font-size:13px; font-weight:600; padding:4px 0}
+.sum.t{font-size:15px; font-weight:800; border-top:1px solid var(--line); margin-top:6px; padding-top:10px}
+.track{list-style:none; margin:0; padding:0}
+.track li{display:flex; gap:12px; padding-bottom:18px; position:relative}
+.track li::before{content:""; position:absolute; left:11px; top:24px; bottom:0; width:2px; background:var(--line)}
+.track li:last-child::before{display:none}
+.dot{width:24px; height:24px; flex-shrink:0; border-radius:50%; border:2px solid var(--line); background:#fff; z-index:1}
+.track li.on .dot{background:var(--lime); border-color:var(--ink)}
+.track li.now .dot{animation:pulse 1.2s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 6px rgba(205,219,0,.35)}}
+.map{height:150px; border-radius:16px; margin-bottom:12px; background:#E8EAE2; background-image:linear-gradient(#D7DACE 2px,transparent 2px),linear-gradient(90deg,#D7DACE 2px,transparent 2px); background-size:34px 34px; position:relative; overflow:hidden}
+.pin{position:absolute; width:14px; height:14px; border-radius:50%; border:3px solid #fff; box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.rider{transition:left 1.4s ease, top 1.4s ease}
+.eta{font-family:'Bricolage Grotesque',Manrope,sans-serif; font-size:26px; font-weight:800}
+.tabs{display:flex; gap:6px; background:#fff; border:1px solid var(--line); padding:4px; border-radius:12px; margin-bottom:12px}
+.tabs button{flex:1; border:none; background:none; border-radius:9px; padding:8px; font-weight:800; font-size:12.5px; color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--ink); color:#fff}
+.tier{background:var(--ink); color:#fff; border-radius:18px; padding:16px; margin-bottom:12px}
+.tier .big{font-family:'Bricolage Grotesque',Manrope,sans-serif; font-size:30px; font-weight:800; color:var(--lime)}
+.tier .bar{background:rgba(255,255,255,.18)}
+.tier .bar i{background:var(--lime)}
+table{width:100%; border-collapse:collapse; font-size:11.5px}
+th,td{padding:7px 4px; text-align:left; border-bottom:1px solid var(--line)}
+th{font-weight:800}
+td.c,th.c{text-align:center}
+.hl{background:var(--lime-soft)}
+.toast{position:absolute; left:14px; right:14px; bottom:84px; background:var(--ink); color:#fff; border-radius:14px; padding:12px 14px; font-size:13px; font-weight:700; transform:translateY(20px); opacity:0; transition:.25s; pointer-events:none; z-index:10}
+.toast.show{transform:none; opacity:1}
+.modal{position:absolute; inset:0; background:rgba(26,29,36,.55); display:flex; align-items:flex-end; z-index:20}
+.sheet{background:#fff; width:100%; border-radius:24px 24px 0 0; padding:22px 18px 26px}
+.sheet h2{font-family:'Bricolage Grotesque',Manrope,sans-serif; font-size:26px; margin:6px 0 8px}
+.slots{display:flex; flex-wrap:wrap; gap:6px}
+.slots button{border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:8px 10px; font-size:12px; font-weight:700}
+.slots button[aria-pressed="true"]{border-color:var(--ink); background:var(--lime-soft)}
+.empty{text-align:center; padding:40px 10px}
+@media (max-width:900px){ .wrap{flex-direction:column-reverse; gap:28px} .guide{max-width:420px} }
+@media (max-width:520px){
+  .wrap{padding:0; gap:0} .guide{padding:24px 20px 40px}
+  .phone{width:100%; height:100vh; height:100dvh; min-height:0; border-radius:0; padding:0; box-shadow:none}
+  .cam{display:none} .screen{border-radius:0} .scroll{padding-top:calc(16px + env(safe-area-inset-top,0px))}
+}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important; animation:none!important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="guide" aria-label="How to try the prototype">
+    <h1>Housie Pro, working prototype</h1>
+    <p>Tap through the app the way a contractor would. Each step shows one of the recommendations from our case.</p>
+    <ol class="steps" id="steps">
+      <li data-s="kit">Add the predicted site kit on the Order tab</li>
+      <li data-s="order">Open the cart, place the order and watch it arrive</li>
+      <li data-s="bulk">Get a bulk quote with slab pricing</li>
+      <li data-s="job">Accept a nearby job and mark it done</li>
+      <li data-s="plat">Cross 1,500 tier points to unlock Platinum</li>
+    </ol>
+    <button class="reset" id="reset">Reset demo</button>
+    <p class="note">Concept prototype for the Case Club League submission. Prices, points and jobs are illustrative.</p>
+  </section>
+  <div class="phone">
+    <div class="cam"></div>
+    <div class="screen" id="app">
+      <main class="scroll" id="view" aria-live="polite"></main>
+      <nav class="nav" aria-label="Main" id="nav"></nav>
+      <div class="toast" id="toast" role="status"></div>
+      <div id="modal"></div>
+    </div>
+  </div>
+</div>
+<script>
+const SVG = {"cement": "<svg viewBox=\"0 0 48 48\"><path d=\"M12 8h24l3 6v24l-3 4H12l-3-4V14z\" fill=\"#C9C6BD\"></path><path d=\"M12 8h24l3 6H9z\" fill=\"#B3AFA4\"></path><rect x=\"13\" y=\"20\" width=\"22\" height=\"10\" rx=\"2\" fill=\"#6E7A8A\"></rect><rect x=\"17\" y=\"24\" width=\"14\" height=\"2\" rx=\"1\" fill=\"#F1F1EA\"></rect></svg>", "paint": "<svg viewBox=\"0 0 48 48\"><ellipse cx=\"24\" cy=\"12\" rx=\"14\" ry=\"4\" fill=\"#8A8F99\"></ellipse><path d=\"M10 12v24c0 2.2 6.3 4 14 4s14-1.8 14-4V12c0 2.2-6.3 4-14 4s-14-1.8-14-4z\" fill=\"#D8DBE0\"></path><path d=\"M10 20c0 2.2 6.3 4 14 4s14-1.8 14-4v9c0 2.2-6.3 4-14 4s-14-1.8-14-4z\" fill=\"#3E7BD6\"></path><path d=\"M16 22v8\" stroke=\"#2C5FAE\" stroke-width=\"3\" stroke-linecap=\"round\"></path></svg>", "ply": "<svg viewBox=\"0 0 48 48\"><path d=\"M6 30 30 18l12 6-24 12z\" fill=\"#C8955A\"></path><path d=\"M6 30v4l12 6v-4z\" fill=\"#9C6C38\"></path><path d=\"M18 36v4l24-12v-4z\" fill=\"#B07D45\"></path><path d=\"M6 24 30 12l12 6-24 12z\" fill=\"#DDB07A\"></path><path d=\"M6 24v3l12 6v-3z\" fill=\"#A87842\"></path><path d=\"M18 30v3l24-12v-3z\" fill=\"#C08D52\"></path></svg>", "elec": "<svg viewBox=\"0 0 48 48\"><path d=\"M24 6a12 12 0 0 0-7 21.7V32h14v-4.3A12 12 0 0 0 24 6z\" fill=\"#F7D56B\"></path><path d=\"M20 20l4 5 4-5\" fill=\"none\" stroke=\"#C9971C\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"></path><rect x=\"17\" y=\"32\" width=\"14\" height=\"4\" fill=\"#9AA0AA\"></rect><rect x=\"18\" y=\"36\" width=\"12\" height=\"3\" fill=\"#7C828C\"></rect><rect x=\"20\" y=\"39\" width=\"8\" height=\"3\" rx=\"1.5\" fill=\"#5F646D\"></rect></svg>", "bath": "<svg viewBox=\"0 0 48 48\"><rect x=\"8\" y=\"34\" width=\"32\" height=\"6\" rx=\"2\" fill=\"#B8BDC6\"></rect><path d=\"M20 34V18a8 8 0 0 1 8-8h6v6h-6a2 2 0 0 0-2 2v16z\" fill=\"#9AA3B0\"></path><rect x=\"32\" y=\"8\" width=\"8\" height=\"10\" rx=\"2\" fill=\"#7E8795\"></rect><path d=\"M36 22v4M33 26v3M39 26v3\" stroke=\"#5AA7E0\" stroke-width=\"2\" stroke-linecap=\"round\"></path></svg>", "plumb": "<svg viewBox=\"0 0 48 48\"><path d=\"M6 14h18a10 10 0 0 1 10 10v18h-10V24H6z\" fill=\"#E7E4DC\"></path><path d=\"M6 14h18a10 10 0 0 1 10 10v18\" fill=\"none\" stroke=\"#A9A496\" stroke-width=\"2\"></path><path d=\"M6 24h18v18\" fill=\"none\" stroke=\"#A9A496\" stroke-width=\"2\"></path><rect x=\"4\" y=\"12\" width=\"5\" height=\"14\" rx=\"1\" fill=\"#F2A33A\"></rect><rect x=\"22\" y=\"39\" width=\"14\" height=\"5\" rx=\"1\" fill=\"#F2A33A\"></rect></svg>", "adhes": "<svg viewBox=\"0 0 48 48\"><rect x=\"14\" y=\"14\" width=\"20\" height=\"28\" rx=\"3\" fill=\"#F4F4F2\" stroke=\"#C9C6BD\" stroke-width=\"1.5\"></rect><rect x=\"18\" y=\"8\" width=\"12\" height=\"7\" rx=\"2\" fill=\"#E0493E\"></rect><rect x=\"14\" y=\"22\" width=\"20\" height=\"10\" fill=\"#2F6FD0\"></rect><path d=\"M19 27h10\" stroke=\"#FFFFFF\" stroke-width=\"2\" stroke-linecap=\"round\"></path></svg>", "hard": "<svg viewBox=\"0 0 48 48\"><path d=\"M22 20 36 38a3 3 0 0 1-4.5 3.8L18 24z\" fill=\"#B07D45\"></path><path d=\"M10 12l8-6 10 4 2 6-6 6-6-2z\" fill=\"#6E7580\"></path><path d=\"M10 12l4 10 6 0\" fill=\"none\" stroke=\"#4E545D\" stroke-width=\"2\" stroke-linejoin=\"round\"></path></svg>"};
+const CATS=[['cement','Cement & Plaster'],['paint','Paints & Putty'],['ply','Plywood & MDF'],['elec','Electricals & Lights'],['bath','Bath Fittings'],['plumb','Plumbing Pipes'],['adhes','Adhesives'],['hard','Hardware & Tools']];
+const P=[
+ {id:'opc',c:'cement',n:'OPC 53 grade cement',u:'50 kg bag',p:420},
+ {id:'ppc',c:'cement',n:'PPC cement',u:'50 kg bag',p:390},
+ {id:'putty',c:'cement',n:'Wall putty',u:'20 kg bag',p:780},
+ {id:'gyp',c:'cement',n:'Gypsum plaster',u:'25 kg bag',p:390},
+ {id:'emul',c:'paint',n:'Interior emulsion',u:'10 L',p:2450},
+ {id:'primer',c:'paint',n:'Wall primer',u:'4 L',p:780},
+ {id:'brush',c:'paint',n:'Paint brush set',u:'set of 3',p:240,pl:1},
+ {id:'bwr',c:'ply',n:'BWR plywood 18 mm',u:'8 × 4 ft sheet',p:2850},
+ {id:'mdf',c:'ply',n:'MDF board 12 mm',u:'8 × 4 ft sheet',p:1450},
+ {id:'wire',c:'elec',n:'2.5 mm FR wire',u:'90 m coil',p:1950},
+ {id:'mcb',c:'elec',n:'32A MCB',u:'single pole',p:240},
+ {id:'led',c:'elec',n:'LED bulb 9 W',u:'each',p:95},
+ {id:'plate',c:'elec',n:'6-module switch plate',u:'each',p:210},
+ {id:'tap',c:'bath',n:'Pillar tap',u:'chrome finish',p:650},
+ {id:'hf',c:'bath',n:'Health faucet set',u:'with hose',p:540},
+ {id:'cpvc',c:'plumb',n:'CPVC pipe 1 inch',u:'3 m length',p:480},
+ {id:'elbow',c:'plumb',n:'PVC elbow pack',u:'10 pieces',p:120,pl:1},
+ {id:'tile',c:'adhes',n:'Tile adhesive',u:'20 kg bag',p:520},
+ {id:'wood',c:'adhes',n:'Wood adhesive',u:'1 kg',p:330,pl:1},
+ {id:'screw',c:'hard',n:'Wood screws',u:'box of 200',p:150,pl:1},
+ {id:'tape',c:'hard',n:'Measuring tape 5 m',u:'each',p:180},
+ {id:'ham',c:'hard',n:'Claw hammer',u:'each',p:320}];
+const PB=Object.fromEntries(P.map(x=>[x.id,x]));
+const BULK={opc:{step:10,min:{Silver:50,Gold:30,Platinum:20},d:.04,d2:.06,big:100},bwr:{step:2,min:{Silver:20,Gold:15,Platinum:10},d:.04},tile:{step:10,min:{Silver:50,Gold:30,Platinum:20},d:.03}};
+const ICON={
+ order:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>',
+ bulk:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="6" width="14" height="11" rx="1"/><path d="M15 10h4l3 3v4h-7z"/><circle cx="6" cy="18.5" r="1.8"/><circle cx="18" cy="18.5" r="1.8"/></svg>',
+ jobs:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+ rewards:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v9H5v-9"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></svg>',
+ cart:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/><path d="M2 3h3l2.7 12.4a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/></svg>',
+ user:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+ back:'<svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>',
+ bolt:'<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A1D24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
+ search:'<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',
+ wrench:'<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1D24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18v3h3l6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/></svg>'};
+const JOBS0=()=>[{id:1,t:'Fan installation',a:'Sector 56',w:'Today, 4–6 pm',fee:450,st:'open'},{id:2,t:'Tap replacement',a:'Sector 57',w:'Today, 6–7 pm',fee:350,st:'open'},{id:3,t:'Switchboard fitting',a:'Sector 49',w:'Tomorrow, 10 am–12 pm',fee:600,st:'open'}];
+const init=()=>({view:'home',prev:'home',cat:null,cart:{},bal:1240,tp:1240,order:null,bulk:{opc:0,bwr:0,tile:0},slot:null,jobs:JOBS0(),jt:'near',earned:3600,jd:9,done:{},q:'',plat:false,redeemed:[]});
+let S=init(); let timers=[];
+const $=s=>document.querySelector(s);
+const inr=n=>'₹'+Math.round(n).toLocaleString('en-IN');
+const tier=()=>S.tp>=1500?'Platinum':S.tp>=500?'Gold':'Silver';
+const mult=()=>({Silver:1,Gold:1.25,Platinum:1.5})[tier()];
+const payout=()=>({Silver:'within 48 hours',Gold:'within 24 hours',Platinum:'the same day'})[tier()];
+const cartCount=()=>Object.values(S.cart).reduce((a,b)=>a+b,0);
+const lines=()=>Object.entries(S.cart).filter(([,q])=>q>0).map(([id,q])=>({...PB[id],q}));
+const subtotal=()=>lines().reduce((a,l)=>a+l.p*l.q,0);
+const kitBonus=()=>(S.cart.wire&&S.cart.mcb&&S.done.kit)?25:0;
+const orderPts=()=>Math.floor(lines().reduce((a,l)=>a+l.p*l.q*(l.pl?2:1),0)/125*mult())+kitBonus();
+function mark(k){S.done[k]=1; document.querySelectorAll('#steps li').forEach(li=>li.classList.toggle('done',!!S.done[li.dataset.s]));}
+function toast(m){const t=$('#toast'); t.textContent=m; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),2600);}
+function addPts(n){S.bal+=n; S.tp+=n; if(S.tp>=1500&&!S.plat){S.plat=true; S.platPending=true; mark('plat'); setTimeout(()=>{if(!$('#modal').innerHTML&&S.platPending) platModal();},900);}}
+function go(v,extra){S.prev=S.view; S.view=v; Object.assign(S,extra||{}); render(); $('#view').scrollTop=0;}
+function add(id,q=1){S.cart[id]=(S.cart[id]||0)+q; if(S.cart[id]<=0) delete S.cart[id];}
+function header(){return `<div class="top"><div class="brand"><span class="word">housie</span><span class="pro">PRO</span></div><div class="icons">
+ <button class="ib" data-a="cart" aria-label="Cart, ${cartCount()} items">${ICON.cart}${cartCount()?`<span class="badge">${cartCount()}</span>`:''}</button>
+ <button class="ib" data-a="account" aria-label="My account">${ICON.user}</button></div></div>`;}
+function backbar(title,to){return `<div class="back"><button class="ib" data-a="go" data-v="${to}" aria-label="Back">${ICON.back}</button><h2>${title}</h2></div>`;}
+function stepper(id){const q=S.cart[id]||0; return q?`<div class="step"><button data-a="dec" data-id="${id}" aria-label="Remove one">−</button><span>${q}</span><button data-a="inc" data-id="${id}" aria-label="Add one">+</button></div>`:`<button class="btn" data-a="inc" data-id="${id}">Add</button>`;}
+function prodRow(x){return `<div class="item"><div class="thumb">${SVG[x.c]}</div><div class="grow"><div class="pn">${x.n}</div><div class="muted">${x.u} · ${inr(x.p)}${x.pl?' · <span class="tag">Housie Basics · 2x points</span>':''}</div></div>${stepper(x.id)}</div>`;}
+function results(){const q=S.q.trim().toLowerCase(); if(!q) return ''; const r=P.filter(x=>(x.n+' '+x.u).toLowerCase().includes(q)); return `<div class="card">${r.length?r.map(prodRow).join(''):`<div class="muted">No products match “${S.q}”. Try cement, wire or tap.</div>`}</div>`;}
+function vHome(){const t=tier(); const next=t==='Silver'?500:1500; const pct=t==='Platinum'?100:Math.min(100,S.tp/next*100);
+ const j1=S.jobs[0];
+ return header()+`<div class="deliv">${ICON.bolt}<b>Delivery in 30 mins</b> Sector 57, Gurugram ${t!=='Silver'?`<span class="tag">Free delivery, ${t}</span>`:''}</div>
+ <label class="search">${ICON.search}<input id="q" type="search" placeholder="What do you need today?" value="${S.q.replace(/"/g,'&quot;')}" aria-label="Search materials"></label>
+ <div id="results">${results()}</div>
+ <button class="hello" data-a="go" data-v="rewards" style="width:100%;border:none;text-align:left;color:inherit"><div class="row"><span class="name">Namaste, Ramesh ji</span><span class="chipd">${t} Pro · ${S.bal.toLocaleString('en-IN')} pts</span></div>
+ <div class="bar"><i style="width:${pct}%"></i></div><div class="small">${t==='Platinum'?'Top tier reached. Captain invites unlocked':(next-S.tp)+' tier points to '+(t==='Silver'?'Gold':'Platinum')}</div></button>
+ <div class="sec"><h3>Shop by categories</h3></div>
+ <div class="cats">${CATS.map(([id,n])=>`<button class="cat" data-a="cat" data-c="${id}"><span class="t">${SVG[id]}</span>${n}</button>`).join('')}</div>
+ <div class="card"><div class="over">Site stage: wiring</div><div class="ct">Your Sector 57 site will likely need next</div>
+  <div class="chips"><span class="chip">2.5 mm wire × 2</span><span class="chip">32A MCB × 4</span></div>
+  <div class="rowb"><span class="muted">${inr(1950*2+240*4)} · 2 items</span>${S.done.kit?`<button class="btn o" data-a="cart">In your cart</button>`:`<button class="btn" data-a="kit">Add site kit</button>`}</div></div>
+ <div class="card"><div class="ct" style="margin-top:0">Bulk order for your site</div><div class="muted">Upload your material list and get slab pricing. ${t} slabs start at ${BULK.opc.min[t]} bags.</div>
+  <div class="rowb"><div class="chips"><span class="chip">Cement ${BULK.opc.min[t]}+ bags</span><span class="chip">Ply ${BULK.bwr.min[t]}+ sheets</span></div><button class="btn o" data-a="go" data-v="bulk">Get quote</button></div></div>
+ <div class="card" style="display:flex;gap:10px;align-items:center"><div class="thumb">${ICON.wrench}</div><div class="grow"><div class="pn">Job near you: ${j1.t}</div><div class="muted">${j1.a} · ${j1.w} · ${inr(j1.fee)}</div></div>
+  ${j1.st==='open'?`<button class="btn l" data-a="accept" data-id="1">Accept</button>`:`<button class="btn o" data-a="go" data-v="jobs" data-jt="mine">View</button>`}</div>`;}
+function vCat(){const [id,n]=CATS.find(c=>c[0]===S.cat); const items=P.filter(x=>x.c===id);
+ return backbar(n,'home')+`<div class="deliv">${ICON.bolt}<b>All in stock</b> at your nearest store, 2.1 km away</div><div class="card">${items.map(prodRow).join('')}</div>`+(cartCount()?`<button class="btn w" data-a="cart">View cart · ${cartCount()} items · ${inr(subtotal())}</button>`:'');}
+function vCart(){const ls=lines(); if(!ls.length) return backbar('Your cart','home')+`<div class="empty"><p class="pn">Your cart is empty</p><p class="muted">Add the predicted site kit or browse a category to start.</p><button class="btn" data-a="go" data-v="home">Shop materials</button></div>`;
+ const sub=subtotal(); const t=tier(); const small=sub<1000; const fee=small&&t==='Silver'?49:0; const pts=orderPts();
+ return backbar('Your cart','home')+`<div class="card">${ls.map(prodRow).join('')}</div>
+ <div class="card"><div class="sum"><span>Items</span><span>${inr(sub)}</span></div>
+ <div class="sum"><span>Delivery to Sector 57 site</span><span>${fee?inr(fee):(small?'Free, '+t+' benefit':'Free')}</span></div>
+ <div class="sum t"><span>To pay</span><span>${inr(sub+fee)}</span></div>
+ <div class="sum" style="color:var(--ok)"><span>Points you'll earn (${mult()}x ${t}${kitBonus()?', +25 site kit':''})</span><span>+${pts}</span></div></div>
+ <div class="deliv">${ICON.bolt}<b>Arrives in about 30 mins</b> from the Sector 49 store</div>
+ <button class="btn w" data-a="place">Place order · ${inr(sub+fee)}</button>`;}
+function vTrack(){const o=S.order; const st=o.step; const pos=[[18,70],[18,70],[52,45],[80,24]][st];
+ const L=['Order placed','Packed at Sector 49 store','Out for delivery on an EV loader (Sunil)','Delivered to your Sector 57 site'];
+ return backbar('Order '+o.id,'home')+`<div class="map" aria-hidden="true"><span class="pin" style="left:18%;top:70%;background:#1A1D24"></span><span class="pin" style="left:80%;top:24%;background:#CDDB00"></span><span class="pin rider" style="left:${pos[0]}%;top:${pos[1]}%;background:#2F7D4F;width:18px;height:18px"></span></div>
+ <div class="card"><div class="muted">${st<3?'Arriving in':'Delivered in'}</div><div class="eta">${st<3?[30,24,12][st]+' min':'27 min'}</div>
+ <div class="muted">${o.n} items · ${inr(o.total)} · +${o.pts} points ${st<3?'on delivery':'added'}</div></div>
+ <div class="card"><ol class="track">${L.map((l,i)=>`<li class="${i<=st?'on':''} ${i===st&&st<3?'now':''}"><span class="dot"></span><div><div class="pn">${l}</div>${i===st&&st<3?'<div class="muted">Live</div>':''}</div></li>`).join('')}</ol></div>
+ ${st===3?`<button class="btn w" data-a="go" data-v="home">Back to shop</button>`:''}`;}
+function bulkCalc(){const t=tier(); let list=0,disc=0; const rows=Object.entries(S.bulk).map(([id,q])=>{const b=BULK[id],x=PB[id]; const v=x.p*q; let d=0; if(q>=b.min[t]) d=(b.big&&q>=b.big)?b.d2:b.d; list+=v; disc+=v*d; return {id,x,q,v,d,need:Math.max(0,b.min[t]-q)};});
+ const total=list-disc; const pts=Math.floor(total/125*mult()*0.5); return {rows,list,disc,total,pts};}
+function vBulk(){const t=tier(); const c=bulkCalc(); const any=c.list>0;
+ return `<div class="back"><h2>Bulk order</h2></div><div class="card"><div class="ct" style="margin-top:0">Order at site scale</div><div class="muted">Send your material list and get slab prices, with scheduled delivery to your site. As a ${t} member, slabs start at ${BULK.opc.min[t]} bags of cement.</div>
+ <div class="rowb"><span class="muted">BOQ, photo or WhatsApp list</span><button class="btn l" data-a="upload">Upload material list</button></div></div>
+ <div class="card">${c.rows.map(r=>`<div class="item"><div class="thumb">${SVG[r.x.c]}</div><div class="grow"><div class="pn">${r.x.n}</div><div class="muted">${inr(r.x.p)} per ${r.x.u.split(' ').slice(-1)} · ${r.d?`<span class="tag">Slab −${Math.round(r.d*100)}%</span>`:(r.q?`${r.need} more for slab price`:`Slab from ${BULK[r.id].min[t]}`)}</div></div>
+ <div class="step"><button data-a="bdec" data-id="${r.id}" aria-label="Fewer">−</button><span>${r.q}</span><button data-a="binc" data-id="${r.id}" aria-label="More">+</button></div></div>`).join('')}</div>
+ ${any?`<div class="card"><div class="sum"><span>List price</span><span>${inr(c.list)}</span></div><div class="sum" style="color:var(--ok)"><span>Slab discount</span><span>−${inr(c.disc)}</span></div><div class="sum"><span>Site delivery</span><span>Free, scheduled</span></div><div class="sum t"><span>Quote total</span><span>${inr(c.total)}</span></div><div class="muted" style="margin-top:4px">Bulk orders earn 0.5x points: +${c.pts}</div></div>
+ <div class="sec"><h3>Pick a delivery slot</h3></div><div class="slots" role="group" aria-label="Delivery slot">${['Tomorrow, 8–10 am','Tomorrow, 2–4 pm','Monday, 8–10 am'].map(s=>`<button data-a="slot" data-s="${s}" aria-pressed="${S.slot===s}">${s}</button>`).join('')}</div>
+ <div style="height:12px"></div><button class="btn w" data-a="bconfirm" ${S.slot?'':'disabled'}>Confirm bulk order · ${inr(c.total)}</button>${S.slot?'':'<p class="muted" style="text-align:center">Pick a slot to confirm</p>'}`:''}`;}
+function vJobs(){const near=S.jobs.filter(j=>j.st==='open'), mine=S.jobs.filter(j=>j.st!=='open');
+ const row=j=>`<div class="card" style="display:flex;gap:10px;align-items:center"><div class="thumb">${ICON.wrench}</div><div class="grow"><div class="pn">${j.t}</div><div class="muted">${j.a} · ${j.w}</div><div class="muted">Customer pays ${inr(j.fee)} · you earn ${inr(j.fee*.85)}</div></div>
+ ${j.st==='open'?`<button class="btn l" data-a="accept" data-id="${j.id}">Accept</button>`:j.st==='acc'?`<button class="btn" data-a="jdone" data-id="${j.id}">Mark done</button>`:`<span class="tag">Done · +30 pts</span>`}</div>`;
+ return `<div class="back"><h2>Jobs</h2></div><div class="tier" style="padding:14px"><div class="small" style="color:#C9CCD3">This month</div><div class="big" style="font-size:26px">${inr(S.earned)} earned</div><div class="small" style="color:#C9CCD3">${S.jd} jobs · rated 4.8 · payouts ${payout()}</div></div>
+ <div class="tabs" role="tablist"><button role="tab" aria-selected="${S.jt==='near'}" data-a="jt" data-t="near">Near you (${near.length})</button><button role="tab" aria-selected="${S.jt==='mine'}" data-a="jt" data-t="mine">My jobs (${mine.length})</button></div>
+ ${(S.jt==='near'?near:mine).map(row).join('')||`<div class="empty"><p class="pn">${S.jt==='near'?'No open jobs nearby right now':'No jobs yet'}</p><p class="muted">${S.jt==='near'?'New installation requests appear here as customers book them.':'Accept a job from Near you to see it here.'}</p></div>`}
+ <p class="muted">Each finished job earns 15 points, plus 10 for a 5-star rating and 5 for finishing on time.</p>`;}
+function vRewards(){const t=tier(); const next=t==='Silver'?500:1500; const pct=t==='Platinum'?100:S.tp/next*100; const col={Silver:1,Gold:2,Platinum:3}[t];
+ const rows=[['Points multiplier','1x','1.25x','1.5x'],['Small-order delivery fee','₹49','Free','Free'],['Bulk slab from','50 bags','30 bags','20 bags'],['Job board','Standard','10 min early','First pick'],['Job payout','48 hours','24 hours','Same day'],['Accident insurance','–','–','Included'],['Account manager','–','–','Dedicated']];
+ const R=[['₹200 off your next order',200],['Safety gloves and goggles kit',350],['Family accident cover top-up',500],['UPI cash-out ₹300',400]];
+ return `<div class="back"><h2>Rewards</h2></div><div class="tier"><div class="small" style="color:#C9CCD3">Your tier</div><div class="big">${t} Pro</div>
+ <div class="bar"><i style="width:${pct}%"></i></div><div class="small" style="color:#C9CCD3">${t==='Platinum'?'Top tier. Keep 1,500 tier points each quarter to stay here':`${S.tp.toLocaleString('en-IN')} of ${next.toLocaleString('en-IN')} tier points in the last 3 months`}</div>
+ <div class="rowb" style="margin-top:12px"><span class="small">Points balance</span><span class="big" style="font-size:22px">${S.bal.toLocaleString('en-IN')}</span></div></div>
+ <div class="card"><table><thead><tr><th>Benefit</th>${['Silver','Gold','Platinum'].map((h,i)=>`<th class="c ${i+1===col?'hl':''}">${h}</th>`).join('')}</tr></thead><tbody>${rows.map(r=>`<tr><td>${r[0]}</td>${r.slice(1).map((v,i)=>`<td class="c ${i+1===col?'hl':''}">${v}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+ <div class="card"><div class="ct" style="margin-top:0">How you earn</div><div class="muted" style="line-height:1.7">1 point per ₹125 on materials, times your tier multiplier<br>2x points on Housie Basics products<br>+25 for ordering a predicted site kit<br>15 to 30 points per finished job<br>100 points for each pro you refer</div></div>
+ <div class="sec"><h3>Redeem</h3></div>${R.map(([n,c])=>`<div class="card" style="display:flex;align-items:center;gap:10px"><div class="grow"><div class="pn">${n}</div><div class="muted">${c} points</div></div><button class="btn ${S.bal>=c?'':'o'}" data-a="redeem" data-n="${n}" data-c="${c}" ${S.bal>=c?'':'disabled'}>Redeem</button></div>`).join('')}
+ <p class="muted">Redeeming uses your balance only. Your tier depends on points earned in the last 3 months, so it stays the same.</p>`;}
+function vAccount(){return backbar('My account',S.prev==='account'?'home':S.prev)+`<div class="card"><div class="pn" style="font-size:17px">Ramesh Kumar</div><div class="muted">Electrical contractor · +91 98••• ••321 · ${tier()} Pro</div></div>
+ <div class="sec"><h3>My sites</h3></div><div class="card"><div class="item"><div class="grow"><div class="pn">Sector 57 villa</div><div class="muted">Stage: wiring · 14 orders</div></div><span class="tag">Active</span></div><div class="item"><div class="grow"><div class="pn">DLF Phase 3 flat</div><div class="muted">Stage: finishing · 6 orders</div></div></div></div>
+ <div class="sec"><h3>Invite pros, become a Captain</h3></div><div class="card"><div class="muted">Earn 100 points for each pro who places a first order. Captains also earn ₹150 per activated pro.</div><div class="bar" style="background:var(--chip)"><i style="width:40%"></i></div><div class="small">2 of 5 invites to Captain</div>
+ <div class="rowb"><span class="chip">Code RAMESH57</span><button class="btn" data-a="invite">Share invite</button></div></div>`;}
+const V={home:vHome,cat:vCat,cart:vCart,track:vTrack,bulk:vBulk,jobs:vJobs,rewards:vRewards,account:vAccount};
+function render(){ $('#view').innerHTML=V[S.view]();
+ const tab={home:'home',cat:'home',cart:'home',track:'home',account:'home',bulk:'bulk',jobs:'jobs',rewards:'rewards'}[S.view];
+ $('#nav').innerHTML=[['home','Order',ICON.order],['bulk','Bulk',ICON.bulk],['jobs','Jobs',ICON.jobs],['rewards','Rewards',ICON.rewards]].map(([v,l,i])=>`<button data-a="go" data-v="${v}" ${tab===v?'aria-current="page"':''}>${i}${l}</button>`).join('');
+ const q=$('#q'); if(q) q.addEventListener('input',e=>{S.q=e.target.value; $('#results').innerHTML=results();});}
+function platModal(){ S.platPending=false; $('#modal').innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="pm"><div class="sheet"><span class="pro">New tier</span><h2 id="pm">You're Platinum now</h2>
+ <div class="muted" style="line-height:1.8;font-size:13.5px">1.5x points on every order<br>First pick of nearby jobs and same-day payouts<br>Accident insurance included<br>Bulk slab prices from 20 bags<br>A dedicated account manager</div><div style="height:14px"></div><button class="btn w" data-a="closemodal">See my benefits</button></div></div>`; $('#modal button').focus();}
+function place(){const o={id:'HS'+(4100+Math.floor(Math.random()*800)),n:cartCount(),total:subtotal()+((subtotal()<1000&&tier()==='Silver')?49:0),pts:orderPts(),step:0};
+ S.order=o; S.cart={}; go('track'); mark('order');
+ [1,2,3].forEach((s,i)=>timers.push(setTimeout(()=>{if(S.order!==o)return; o.step=s; if(s===3){addPts(o.pts); toast(`Delivered in 27 minutes. +${o.pts} points added`);} if(S.view==='track') render();},1700*(i+1))));}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-a]'); if(!b) return; const a=b.dataset.a, id=b.dataset.id;
+ if(a==='go'){ if(b.dataset.jt) S.jt=b.dataset.jt; go(b.dataset.v); }
+ else if(a==='cart') go('cart');
+ else if(a==='account') go('account');
+ else if(a==='cat') go('cat',{cat:b.dataset.c});
+ else if(a==='inc'){add(id,1); render();}
+ else if(a==='dec'){add(id,-1); render();}
+ else if(a==='kit'){add('wire',2); add('mcb',4); mark('kit'); toast('Site kit added: 2 coils of wire and 4 MCBs. +25 bonus points on delivery'); render();}
+ else if(a==='place') place();
+ else if(a==='upload'){S.bulk={opc:60,bwr:24,tile:40}; toast('Material list read: 60 bags cement, 24 ply sheets, 40 bags tile adhesive'); render();}
+ else if(a==='binc'||a==='bdec'){const s=BULK[id].step; S.bulk[id]=Math.max(0,S.bulk[id]+(a==='binc'?s:-s)); render();}
+ else if(a==='slot'){S.slot=b.dataset.s; render();}
+ else if(a==='bconfirm'){const c=bulkCalc(); addPts(c.pts); mark('bulk'); const slot=S.slot; S.bulk={opc:0,bwr:0,tile:0}; S.slot=null;
+   $('#modal').innerHTML=`<div class="modal" role="dialog" aria-modal="true" aria-labelledby="bm"><div class="sheet"><span class="pro">Bulk order</span><h2 id="bm">Bulk order confirmed</h2><div class="muted" style="line-height:1.8;font-size:13.5px">Delivery: ${slot}, Sector 57 site<br>You pay ${inr(c.total)} after a slab saving of ${inr(c.disc)}<br>+${c.pts} points added</div><div style="height:14px"></div><button class="btn w" data-a="closemodal">Done</button></div></div>`; $('#modal button').focus(); render();}
+ else if(a==='accept'){const j=S.jobs.find(x=>x.id==id); j.st='acc'; S.jt='mine'; toast(`Job accepted: ${j.t}, ${j.a}. The customer has been told you're coming`); go('jobs');}
+ else if(a==='jdone'){const j=S.jobs.find(x=>x.id==id); j.st='done'; S.earned+=j.fee*.85; S.jd++; addPts(30); mark('job'); toast(`Job done. Customer rated you 5 stars. +30 points, ${inr(j.fee*.85)} paid ${payout()}`); render();}
+ else if(a==='jt'){S.jt=b.dataset.t; render();}
+ else if(a==='redeem'){const c=+b.dataset.c; if(S.bal<c) return; S.bal-=c; toast(`Redeemed: ${b.dataset.n}`); render();}
+ else if(a==='invite'){toast('Invite link ready to share on WhatsApp');}
+ else if(a==='closemodal'){const plat=$('#pm'); $('#modal').innerHTML=''; if(plat) go('rewards'); else if(S.platPending) platModal();}
+});
+$('#reset').addEventListener('click',()=>{timers.forEach(clearTimeout); timers=[]; S=init(); $('#modal').innerHTML=''; mark('_'); render(); toast('Demo reset');});
+render();
+</script>
+</body>
+</html>
